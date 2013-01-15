@@ -40,29 +40,7 @@ game.addItem(drone.item());
   .after(2000, function() {
     console.log('flip left');
     this.stop();
-    this.up(0.5);
-    this.animateLeds('blinkRed', 5, 2);
-    //this.front(0.5);
-    //this.animate('flipLeft', 15);
-  })
-  .after(5000, function() {
-    console.log('flip right');
-    this.stop();
-    this.animateLeds('blinkGreen', 5, 2);
-    //this.back(0.5);
-    //this.animate('flipRight', 15);
-  })
-  .after(5000, function() {
-    console.log('flip ahead');
-    this.stop();
-    //this.front(0.5);
-    this.animate('flipAhead', 15);
-  })
-  .after(5000, function() {
-    console.log('flip behind');
-    this.stop();
-    //this.back(0.5);
-    this.animate('flipBehind', 15);
+    this.animate('flipLeft', 15);
   })
   .after(5000, function() {
     console.log('left');
