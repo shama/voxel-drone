@@ -23,7 +23,8 @@ drone
     this.animate('flipLeft', 15);
   })
   .after(5000, function() {
-    this.clo
+    this.stop();
+    this.clockwise(0.3);
   })
   .after(3000, function() {
     this.stop();
