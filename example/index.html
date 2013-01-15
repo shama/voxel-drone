@@ -1,0 +1,28 @@
+<html>
+  <head>
+    <title>voxel-drone</title>
+    <style type="text/css">
+      body { margin: 0px; }
+      #container {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+      #cmd {
+        position: fixed;
+        bottom: 10px;
+        left: 50%;
+        margin-left: -250px;
+        width: 500px;
+        padding: 5px;
+        border: 1px solid #333;
+        background-color: #ddd;
+      }
+    </style>
+  </head>
+  <body>
+    <div><input type="text" id="cmd" placeholder="enter a command; such as: takeoff(), up(0.3), or animate('flipLeft', 15)" /></div>
+    <script type="text/javascript" src="bundle.js"></script>
+  </body>
+</html>
