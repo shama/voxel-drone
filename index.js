@@ -22,7 +22,6 @@ var Drone = function(options) {
   self._navdata            = require('./lib/navdata.json');
   self._drone              = false;
 
-  options.udpControl       = options.udpControl || new ardrone.UdpControl();
   options.udpNavdataStream = options.udpNavdataStream || new ardrone.UdpNavdataStream({
     parser: function(buf) { return buf; }
   });
@@ -40,7 +39,7 @@ var Drone = function(options) {
 
   // on data from udpControl
   self._cmds = [];
-  options.udpControl._socket.on('data', function(cmds) {
+  self._udpControl._socket.on('data', function(cmds) {
     self._cmds = self._cmds.concat(parseAT(cmds));
   });
 
