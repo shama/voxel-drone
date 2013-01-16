@@ -1,7 +1,7 @@
 {
   "name": "voxel-drone",
   "description": "An AR Drone simulator in voxeljs.com",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "homepage": "https://github.com/shama/voxel-drone",
   "author": {
     "name": "Kyle Robinson Young",
