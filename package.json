@@ -1,7 +1,7 @@
 {
   "name": "voxel-drone",
   "description": "An AR Drone simulator in voxeljs.com",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "homepage": "https://github.com/shama/voxel-drone",
   "author": {
     "name": "Kyle Robinson Young",
@@ -29,7 +29,8 @@
   },
   "dependencies": {
     "ar-drone-browserified": "~0.0.5",
-    "voxel-texture": "~0.1.0"
+    "voxel-texture": "~0.1.0",
+    "voxel-move": "~0.1.0"
   },
   "devDependencies": {
     "voxel-engine": "~0.2.4",
@@ -38,6 +39,7 @@
     "grunt-contrib-watch": "~0.2.0rc5"
   },
   "keywords": [
-    "voxel", "nodecopter"
+    "voxel",
+    "nodecopter"
   ]
 }

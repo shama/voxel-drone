@@ -1,6 +1,7 @@
 var util       = require('util');
 var ardrone    = require('ar-drone-browserified');
 var parseAT    = require('./lib/atreader');
+var move       = require('voxel-move');
 
 var Drone = function(options) {
   var self = this;
@@ -74,7 +75,7 @@ Drone.prototype.item = function() {
   //group.translateX(0);
   group.translateY(300);
   group.translateZ(-100);
-  
+
   self._drone = {
     mesh: group,
     width: self.size, height: self.size/6, depth: self.size,
@@ -183,6 +184,8 @@ Drone.prototype._handleREF = function(dt, drone, cmd) {
     if (self.flying) {
       // land!
       drone.velocity.y -= 0.015;
+      drone.mesh.rotation.x = 0;
+      drone.mesh.rotation.z = 0;
       // todo: have this detect altitude and land better
       setTimeout(function() { self.flying = false; }, 500);
     }
@@ -191,23 +194,30 @@ Drone.prototype._handleREF = function(dt, drone, cmd) {
 
 Drone.prototype._handlePCMD = function(dt, drone, cmd) {
   // args: flags, leftRight, frontBack, upDown, clockWise
-  var frontBack = cmd.args[1] || 0;
-  var leftRight = cmd.args[2] || 0;
+  // dont know why leftRight/frontBack are totally switched but they are!
+  var frontBack = cmd.args[2] || 0;
+  var leftRight = cmd.args[1] || 0;
   var upDown    = cmd.args[3] || 0;
   var clockwise = cmd.args[4] || 0;
 
   // todo: figure auto leveling out
   // when it hits 0, it doesnt level for some reason
-  drone.mesh.rotation.x = anim(dt, drone.mesh.rotation.x, frontBack);
-  if (frontBack !== 0) drone.velocity.z += frontBack * this.tilt;
-  else if (!this.animating) drone.mesh.rotation.x = 0;
-
-  drone.mesh.rotation.z = anim(dt, drone.mesh.rotation.z, -leftRight);
-  if (leftRight !== 0) drone.velocity.x += leftRight * this.tilt;
+  drone.mesh.rotation.z = anim(dt, drone.mesh.rotation.z, -frontBack);
+  if (frontBack !== 0) move(drone).front(frontBack * this.tilt);
   else if (!this.animating) drone.mesh.rotation.z = 0;
+
+  drone.mesh.rotation.x = anim(dt, drone.mesh.rotation.x, leftRight);
+  if (leftRight !== 0) move(drone).left(-leftRight * this.tilt);
+  else if (!this.animating) drone.mesh.rotation.x = 0;
 
   if (upDown !== 0) drone.velocity.y += upDown * this.verticalSpeed;
   if (clockwise !== 0) drone.mesh.rotation.y += clockwise * this.yawSpeed;
+
+  // tmp fallback level out
+  if (frontBack === 0 && leftRight === 0 && !this.animating) {
+    drone.mesh.rotation.x = 0;
+    drone.mesh.rotation.z = 0;
+  }
 };
 
 // Handle AT*CONFIG

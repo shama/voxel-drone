@@ -71,6 +71,10 @@ Install devDeps with:
 Then run: `grunt` to copy files, browserify things and run a server on
 [http://localhost:8085](http://localhost:8085).
 
+## release history
+* 0.1.1 - fix rotation relative direction
+* 0.1.0 - initial release
+
 ## license
 Copyright (c) 2013 Kyle Robinson Young  
 Licensed under the MIT license.
