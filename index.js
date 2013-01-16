@@ -9,21 +9,21 @@ var Drone = function(options) {
   if (!options.game) throw new Error('Must specify a game.');
   self.game = options.game;
 
-  self._createMaterials = require('voxel-texture')(self.game);
+  self._createMaterials    = require('voxel-texture')(self.game);
 
-  self.size              = options.size || self.game.cubeSize;
-  self.altitudeLimit     = options.altitudeLimit || 0;
-  self.yawSpeed          = options.yawSpeed || 0.1;
-  self.verticalSpeed     = options.verticalSpeed || 0.1;
-  self.tilt              = options.tilt || 0.1;
-  self.flying            = false;
-  self._animating        = false;
-  self._ledanimating     = false;
-  self._navdata          = require('./lib/navdata.json');
-  self._drone            = false;
+  self.size                = options.size || self.game.cubeSize;
+  self.altitudeLimit       = options.altitudeLimit || 0;
+  self.yawSpeed            = options.yawSpeed || 0.1;
+  self.verticalSpeed       = options.verticalSpeed || 0.1;
+  self.tilt                = options.tilt || 0.1;
+  self.flying              = false;
+  self._animating          = false;
+  self._ledanimating       = false;
+  self._navdata            = require('./lib/navdata.json');
+  self._drone              = false;
 
-  options.udpControl = new ardrone.UdpControl();
-  options.udpNavdataStream = new ardrone.UdpNavdataStream({
+  options.udpControl       = options.udpControl || new ardrone.UdpControl();
+  options.udpNavdataStream = options.udpNavdataStream || new ardrone.UdpNavdataStream({
     parser: function(buf) { return buf; }
   });
   ardrone.Client.call(self, options);
