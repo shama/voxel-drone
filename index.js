@@ -39,7 +39,7 @@ var Drone = function(options) {
 
   // on data from udpControl
   self._cmds = [];
-  options.udpControl._socket.on('data', function(cmds) {
+  self._udpControl._socket.on('data', function(cmds) {
     self._cmds = self._cmds.concat(parseAT(cmds));
   });
 
