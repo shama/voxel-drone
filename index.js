@@ -104,14 +104,7 @@ Drone.prototype.createTick = function(drone) {
       // only process the first unique
       if (didem.indexOf(cmd.type + cmd.args[0]) !== -1) return;
       didem.push(cmd.type + cmd.args[0]);
-      switch (cmd.type) {
-        case 'PCMD':
-          if (self.flying) self._handlePCMD(dt, drone, cmd);
-          break;
-        default:
-          self['_handle' + cmd.type](dt, drone, cmd);
-          break;
-      }
+      self['_handle' + cmd.type](dt, drone, cmd);
     });
     self._cmds = [];
   };
@@ -193,6 +186,8 @@ Drone.prototype._handleREF = function(dt, drone, cmd) {
 };
 
 Drone.prototype._handlePCMD = function(dt, drone, cmd) {
+  if (!this.flying) return;
+
   // args: flags, leftRight, frontBack, upDown, clockWise
   // dont know why leftRight/frontBack are totally switched but they are!
   var frontBack = cmd.args[2] || 0;
