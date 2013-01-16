@@ -22,7 +22,6 @@ var Drone = function(options) {
   self._navdata            = require('./lib/navdata.json');
   self._drone              = false;
 
-  options.udpControl       = options.udpControl || new ardrone.UdpControl();
   options.udpNavdataStream = options.udpNavdataStream || new ardrone.UdpNavdataStream({
     parser: function(buf) { return buf; }
   });
