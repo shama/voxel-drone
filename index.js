@@ -17,7 +17,8 @@ var Drone = function(options) {
   self.verticalSpeed     = options.verticalSpeed || 0.1;
   self.tilt              = options.tilt || 0.1;
   self.flying            = false;
-  self.animating         = false;
+  self._animating        = false;
+  self._ledanimating     = false;
   self._navdata          = require('./lib/navdata.json');
   self._drone            = false;
 
@@ -33,7 +34,8 @@ var Drone = function(options) {
   self.LED_COLORS = {
     0: [new self.game.THREE.Color(0x000000), 0],
     1: [new self.game.THREE.Color(0xff0000), 1],
-    2: [new self.game.THREE.Color(0x00ff00), 1]
+    2: [new self.game.THREE.Color(0x00ff00), 1],
+    3: [new self.game.THREE.Color(0xff9900), 1]
   };
 
   // on data from udpControl
@@ -69,7 +71,7 @@ Drone.prototype.item = function() {
   group.add(drone);
 
   self._leds = self._addLEDs(group);
-  self.leds('flying');
+  self.leds('standard');
 
   // starting position - todo: expose this
   //group.translateX(0);
@@ -97,7 +99,7 @@ Drone.prototype.createTick = function(drone) {
 
     // hover - counter gravity
     // todo: make more realistic, add some Math.random()
-    if (self.flying && !self.animating) drone.velocity = {x: 0, z: 0, y: 0.003};
+    if (self.flying && !self._animating) drone.velocity = {x: 0, z: 0, y: 0.003};
 
     var didem = [];
     self._cmds.forEach(function(cmd) {
@@ -114,10 +116,10 @@ Drone.prototype.createTick = function(drone) {
 Drone.prototype.leds = function(leds) {
   var self = this;
   if (typeof leds === 'string') {
-    if (leds === 'emergency')   leds = [1, 1, 1, 1];
-    else if (leds === 'ok')     leds = [2, 2, 2, 2];
-    else if (leds === 'flying') leds = [1, 1, 2, 2];
-    else                        leds = [0, 0, 0, 0];
+    if (leds === 'red')           leds = [1, 1, 1, 1];
+    else if (leds === 'green')    leds = [2, 2, 2, 2];
+    else if (leds === 'standard') leds = [1, 1, 2, 2];
+    else                          leds = [0, 0, 0, 0];
   }
   leds.forEach(function(led, i) {
     var obj = self._leds[i];
@@ -199,17 +201,17 @@ Drone.prototype._handlePCMD = function(dt, drone, cmd) {
   // when it hits 0, it doesnt level for some reason
   drone.mesh.rotation.z = anim(dt, drone.mesh.rotation.z, -frontBack);
   if (frontBack !== 0) move(drone).front(frontBack * this.tilt);
-  else if (!this.animating) drone.mesh.rotation.z = 0;
+  else if (!this._animating) drone.mesh.rotation.z = 0;
 
   drone.mesh.rotation.x = anim(dt, drone.mesh.rotation.x, leftRight);
   if (leftRight !== 0) move(drone).left(-leftRight * this.tilt);
-  else if (!this.animating) drone.mesh.rotation.x = 0;
+  else if (!this._animating) drone.mesh.rotation.x = 0;
 
   if (upDown !== 0) drone.velocity.y += upDown * this.verticalSpeed;
   if (clockwise !== 0) drone.mesh.rotation.y += clockwise * this.yawSpeed;
 
   // tmp fallback level out
-  if (frontBack === 0 && leftRight === 0 && !this.animating) {
+  if (frontBack === 0 && leftRight === 0 && !this._animating) {
     drone.mesh.rotation.x = 0;
     drone.mesh.rotation.z = 0;
   }
@@ -230,14 +232,14 @@ Drone.prototype._handleCONFIG = function(dt, drone, cmd) {
 // Handle AT*CONFG=1,control:flight_anim
 Drone.prototype._handleANIM = function(dt, drone, cmd) {
   var self = this;
-  if (!self.flying) return;
+  if (!self.flying || this._animating) return;
 
   // todo: tweak this closer to actual drone
   var duration = Number(cmd.args[2]) * 10;
   var type     = this.ANIMATIONS[parseInt(cmd.args[1])];
 
-  self.animating = true;
-  setTimeout(function() { self.animating = false; }, duration);
+  self._animating = true;
+  setTimeout(function() { self._animating = false; }, duration);
 
   switch (type) {
     case 'flipLeft': case 'flipRight':
@@ -263,23 +265,45 @@ Drone.prototype._handleANIM = function(dt, drone, cmd) {
 // todo: this is totally not correct!
 Drone.prototype._handleLED = function(dt, drone, cmd) {
   var self     = this;
+  if (this._ledanimating) return;
+
   var type     = this.LED_ANIMATIONS[parseInt(cmd.args[1])];
   var hz       = Number(cmd.args[2]);
   var duration = Number(cmd.args[3]) * 1000;
   var on       = 0;
-  switch (type) {
-    case 'blinkRed':
-      on = Math.sin(TAU * hz * dt) > 0 ? 1 : 0;
-      this.leds([on, on, on, on]);
-      break;
-    case 'blinkGreen':
-      on = Math.sin(TAU * hz * dt) > 0 ? 2 : 0;
-      this.leds([on, on, on, on]);
-      break;
-    // todo: handle other leds animations
-  }
-  // return to normal
-  setTimeout(function() { self.leds('flying'); }, duration);
+
+  var i = 0;
+  self.leds('blank');
+  var interval = setInterval(function() {
+    if (!self._ledanimating) return;
+    switch (type) {
+      case 'blinkRed':
+      case 'blinkGreen':
+      case 'blinkOrange':
+        var n = type === 'blinkRed' ? 1 : type === 'blinkGreen' ? 2 : 3;
+        on = Math.sin(TAU * hz * i) > 0 ? n : 0;
+        self.leds([on, on, on, on]);
+        break;
+      case 'blinkStandard':
+        self.leds(Math.sin(TAU * hz * i) > 0 ? 'standard' : 'blank');
+        break;
+      case 'blinkGreenRed':
+        self.leds(Math.sin(TAU * hz * i) > 0 ? 'green' : 'red');
+        break;
+      default:
+        self.leds(type);
+        break;
+      // todo: handle other leds animations
+    }
+    i += 0.01;
+  }, 100);
+
+  self._ledanimating = true;
+  setTimeout(function() {
+    clearInterval(interval);
+    self.leds('standard');
+    self._ledanimating = false;
+  }, duration);
 };
 
 // animate values to produce smoother results
