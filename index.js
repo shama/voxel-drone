@@ -2,6 +2,7 @@ var util       = require('util');
 var ardrone    = require('ar-drone-browserified');
 var parseAT    = require('./lib/atreader');
 var move       = require('voxel-move');
+var createCam  = require('voxel-camera');
 
 var Drone = function(options) {
   var self = this;
@@ -72,11 +73,6 @@ Drone.prototype.item = function() {
   self._leds = self._addLEDs(group);
   self.leds('standard');
 
-  // starting position - todo: expose this
-  //group.translateX(0);
-  group.translateY(300);
-  group.translateZ(-100);
-
   self._drone = {
     mesh: group,
     width: self.size, height: self.size/6, depth: self.size,
@@ -108,7 +104,60 @@ Drone.prototype.createTick = function(drone) {
       self['_handle' + cmd.type](dt, drone, cmd);
     });
     self._cmds = [];
+
+    // render the camera, follow the drone
+    if (self._cameraControl) {
+      self._cameraControl.render(
+        self._drone,
+        new self.game.THREE.Vector3(-20, 0, 0),
+        new self.game.THREE.Vector3(-100, 0, 0)
+      );
+
+      // monitor follows the player
+      self._monitor.position = self.game.controls.yawObject.position.clone();
+      self._monitor.position.z += 35;
+      self._monitor.position.y -= 25;
+    }
   };
+};
+
+// display video monitor
+// todo: integrate more with ar-drone lib
+// also where is the bottom camera?
+Drone.prototype.viewCamera = function() {
+  var self = this;
+  if (!self._cameraControl) {
+    self._cameraControl = createCam(self.game);
+
+    // add the camera
+    var camera = self._cameraControl.camera();
+    self.game.scene.add(camera);
+
+    self._monitor = new self.game.THREE.Object3D();
+
+    var height = 20;
+    var padding = 2;
+
+    var video = new self.game.THREE.Mesh(
+      new self.game.THREE.CubeGeometry(1.77 * height, height, 0),
+      new self.game.THREE.MeshBasicMaterial({
+        map: self._cameraControl.monitor()
+      })
+    );
+    self._monitor.add(video);
+
+    // border
+    var border = new self.game.THREE.Mesh(
+      new self.game.THREE.CubeGeometry((1.77 * height) + padding, height + padding, 1),
+      new self.game.THREE.MeshBasicMaterial({color: 0x000000})
+    );
+    border.position.set(0, 0, 1);
+    self._monitor.add(border);
+
+    self._monitor.rotation.x = Math.PI / 180 * 60;
+    self.game.scene.add(self._monitor);
+  }
+  return self._monitor;
 };
 
 // turn on/off the leds

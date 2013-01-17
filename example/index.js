@@ -1,71 +1,93 @@
-var createEngine = require('voxel-engine');
 var createDrone = require('../');
+var createEngine = require('voxel-engine');
+var createTerrain = require('voxel-perlin-terrain');
 
 // create the game
 var game = createEngine({
-  generate: function(x, y, z) {
-    return (Math.sqrt(x*x + y*y + z*z) > 20 || y*y > 10) ? 0 : (Math.random() * 2) + 1;
-  },
-  texturePath: './textures/',
-  materials: ['dirt', 'grass']
+  generateVoxelChunk: createTerrain({scaleFactor:10}),
+  chunkDistance: 2,
+  materials: ['obsidian', 'grass', 'dirt', 'plank'],
+  texturePath: './textures/'
 });
-var container = document.body;
+var container = document.getElementById('container');
 game.appendTo(container);
 container.addEventListener('click', function() {
   game.requestPointerLock(container);
 });
 
+// add some trees
+var createTree = require('voxel-forest');
+for (var i = 0; i < 20; i++) {
+  createTree(game, { bark: 4, leaves: 2 });
+}
+
+// ability to explode voxels
+var explode = require('voxel-debris')(game);
+game.on('mousedown', function (pos) {
+  if (erase) explode(pos);
+  else game.createBlock(pos, 1);
+});
+
+var erase = true;
+function ctrlToggle (ev) { erase = !ev.ctrlKey }
+window.addEventListener('keydown', ctrlToggle);
+window.addEventListener('keyup', ctrlToggle);
+
 // Handle entering a command
 window.addEventListener('keyup', function(e) {
-  if (e.keyCode === 13) {
-    var el = document.getElementById('cmd');
-    el.setAttribute('placeholder', eval('drone.' + el.value));
+  if (e.keyCode !== 13) return;
+  var el = document.getElementById('cmd');
+  if (document.activeElement === el) {
+    var res;
+    try {
+      if (el.value !== '') res = eval('drone.' + el.value);
+    } catch (err) {
+      res = err.message;
+    }
+    el.setAttribute('placeholder', res);
     el.value = '';
+    el.blur();
+  } else {
+    el.focus();
   }
 });
 
 // create a drone
 var drone = window.drone = createDrone(game);
-game.addItem(drone.item());
+var item = drone.item();
+item.mesh.position.set(0, 0, -300);
+game.addItem(item);
+
+// show the video monitor
+drone.viewCamera();
 
 // log navdata
 //drone.on('navdata', console.log.bind(console));
 
 // fly the drone
-/*drone
-  .after(5000, function() {
-    console.log('takeoff');
-    this.takeoff();
-  })
-  .after(2000, function() {
-    console.log('flip left');
-    this.stop();
-    this.animate('flipLeft', 15);
-  })
-  .after(5000, function() {
-    console.log('left');
-    this.stop();
-    this.left(0.5);
-  })
-  .after(5000, function() {
-    console.log('right');
-    this.stop();
-    this.right(0.5);
-  })
-  .after(5000, function() {
-    console.log('up');
-    this.stop();
-    this.clockwise(0.5);
-    this.up(1);
-  })
-  .after(5000, function() {
-    console.log('down');
-    this.stop();
-    this.counterClockwise(0.5);
-    this.down(0.5);
-  })
-  .after(5000, function() {
-    console.log('land');
-    this.stop();
-    this.land();
-  });*/
+/*setTimeout(function() {
+  drone.takeoff();
+  setTimeout(function() {
+    drone.animateLeds('blinkGreenRed', 30, 10);
+  }, 2000);
+  return;
+  var cmds = [
+    'front', 'clockwise', 'front',
+    'back', 'clockwise', 'back',
+    'left', 'clockwise', 'left',
+    'right', 'clockwise', 'right',
+  ];
+  var i = 0;
+  (function loop() {
+    if (i >= cmds.length) {
+      //drone.stop();
+      drone.land();
+      return;
+    }
+    var cmd = cmds[i++];
+    drone.stop();
+    console.log(cmd);
+    drone[cmd](0.5);
+    setTimeout(loop, cmd === 'clockwise' ? 2000 : 5000);
+  }());
+}, 5000);*/

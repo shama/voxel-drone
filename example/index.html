@@ -16,13 +16,18 @@
         margin-left: -250px;
         width: 500px;
         padding: 5px;
-        border: 1px solid #333;
-        background-color: #ddd;
+        border: none;
+        background-color: #002;
+        color: #0ff;
+        font-family: Helvetica,Arial,sans-serif;
+        font-size: 9px;
+        font-weight: bold;
       }
     </style>
   </head>
   <body>
-    <div><input type="text" id="cmd" placeholder="enter a command; such as: takeoff(), up(0.3), or animate('flipLeft', 15)" /></div>
+    <div><input type="text" id="cmd" placeholder="Press enter to activate command box. Type in takeoff(), up(0.3), or animate('flipLeft', 15)" /></div>
+    <div id="container"></div>
     <script type="text/javascript" src="bundle.js"></script>
   </body>
 </html>
