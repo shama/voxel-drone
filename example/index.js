@@ -4,9 +4,9 @@ var createTerrain = require('voxel-perlin-terrain');
 
 // create the game
 var game = createEngine({
-  generateVoxelChunk: createTerrain({scaleFactor:10}),
+  generateVoxelChunk: createTerrain({scaleFactor:15}),
   chunkDistance: 2,
-  materials: ['obsidian', 'grass', 'dirt', 'plank'],
+  materials: ['obsidian', ['grass', 'dirt', 'grass_dirt'], 'grass', 'plank'],
   texturePath: './textures/'
 });
 var container = document.getElementById('container');
@@ -18,7 +18,7 @@ container.addEventListener('click', function() {
 // add some trees
 var createTree = require('voxel-forest');
 for (var i = 0; i < 20; i++) {
-  createTree(game, { bark: 4, leaves: 2 });
+  createTree(game, { bark: 4, leaves: 3 });
 }
 
 // ability to explode voxels

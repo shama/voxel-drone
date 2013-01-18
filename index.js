@@ -10,7 +10,10 @@ var Drone = function(options) {
   if (!options.game) throw new Error('Must specify a game.');
   self.game = options.game;
 
-  self._createMaterials    = require('voxel-texture')(self.game);
+  self._materialEngine = require('voxel-texture')({
+    texturePath: self.game.texturePath,
+    THREE: self.game.THREE
+  });
 
   self.size                = options.size || self.game.cubeSize;
   self.altitudeLimit       = options.altitudeLimit || 0;
@@ -66,7 +69,11 @@ Drone.prototype.item = function() {
 
   var drone = new self.game.THREE.Mesh(
     new self.game.THREE.CubeGeometry(self.size, self.size/6, self.size),
-    self._createMaterials(['drone-top', 'drone-bottom', 'drone-side'])
+    self._materialEngine.loadTexture([
+      'drone-side', 'drone-front',
+      'drone-top', 'drone-bottom',
+      'drone-side', 'drone-side'
+    ])
   );
   group.add(drone);
 
