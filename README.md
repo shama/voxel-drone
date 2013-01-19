@@ -72,6 +72,7 @@ Then run: `grunt` to copy files, browserify things and run a server on
 [http://localhost:8085](http://localhost:8085).
 
 ## release history
+* 0.2.1 - cap the amount of tilt. add front texture. update voxel engine.
 * 0.2.0 - video camera!
 * 0.1.2 - fix animations and leds
 * 0.1.1 - fix rotation relative direction
