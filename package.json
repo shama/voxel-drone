@@ -29,12 +29,12 @@
   },
   "dependencies": {
     "ar-drone-browserified": "~0.0.5",
-    "voxel-texture": "~0.2.0",
+    "voxel-texture": "~0.2.1",
     "voxel-move": "~0.1.0",
     "voxel-camera": "~0.1.0"
   },
   "devDependencies": {
-    "voxel-engine": "~0.2.8",
+    "voxel-engine": "~0.2.9",
     "ecstatic": "~0.3.1",
     "grunt": "~0.4.0rc5",
     "grunt-contrib-watch": "~0.2.0rc5",

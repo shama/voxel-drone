@@ -4,10 +4,17 @@ var createTerrain = require('voxel-perlin-terrain');
 
 // create the game
 var game = createEngine({
-  generateVoxelChunk: createTerrain({scaleFactor:15}),
+  generateVoxelChunk: createTerrain({scaleFactor:10}),
   chunkDistance: 2,
-  materials: ['obsidian', ['grass', 'dirt', 'grass_dirt'], 'grass', 'plank'],
-  texturePath: './textures/'
+  materials: [
+    'obsidian',
+    ['grass', 'dirt', 'grass_dirt'],
+    'grass',
+    'plank'
+  ],
+  texturePath: './textures/',
+  startingPosition: [35, -1200, 35],
+  worldOrigin: [0,0,0],
 });
 var container = document.getElementById('container');
 game.appendTo(container);
@@ -55,7 +62,7 @@ window.addEventListener('keyup', function(e) {
 // create a drone
 var drone = window.drone = createDrone(game);
 var item = drone.item();
-item.mesh.position.set(0, 0, -300);
+item.mesh.position.set(0, -1200, -300);
 game.addItem(item);
 
 // show the video monitor

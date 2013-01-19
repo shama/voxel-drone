@@ -12,7 +12,7 @@ module.exports = function(grunt) {
   grunt.registerTask('default', function() {
     var done = this.async();
     grunt.util.async.forEachSeries([
-      'cp -R ./node_modules/voxel-engine/textures/ ./example/textures/',
+      //'cp -R ./node_modules/voxel-engine/textures/ ./example/textures/',
       'cp -R ./textures/ ./example/textures/',
       'browserify example/index.js -o example/bundle.js',
       'node example/server',
