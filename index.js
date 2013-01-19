@@ -254,11 +254,11 @@ Drone.prototype._handlePCMD = function(dt, drone, cmd) {
 
   // todo: figure auto leveling out
   // when it hits 0, it doesnt level for some reason
-  drone.mesh.rotation.z = anim(dt, drone.mesh.rotation.z, -frontBack);
+  drone.mesh.rotation.z = anim(dt, drone.mesh.rotation.z, -frontBack/2);
   if (frontBack !== 0) move(drone).front(frontBack * this.tilt);
   else if (!this._animating) drone.mesh.rotation.z = 0;
 
-  drone.mesh.rotation.x = anim(dt, drone.mesh.rotation.x, leftRight);
+  drone.mesh.rotation.x = anim(dt, drone.mesh.rotation.x, leftRight/2);
   if (leftRight !== 0) move(drone).left(-leftRight * this.tilt);
   else if (!this._animating) drone.mesh.rotation.x = 0;
 
@@ -269,6 +269,14 @@ Drone.prototype._handlePCMD = function(dt, drone, cmd) {
   if (frontBack === 0 && leftRight === 0 && !this._animating) {
     drone.mesh.rotation.x = 0;
     drone.mesh.rotation.z = 0;
+  }
+
+  // cap the amount of tilt
+  if (Math.abs(drone.mesh.rotation.z) >= 1 && !this._animating) {
+    drone.mesh.rotation.z = drone.mesh.rotation.z < 0 ? -1 : 1;
+  }
+  if (Math.abs(drone.mesh.rotation.x) >= 1 && !this._animating) {
+    drone.mesh.rotation.x = drone.mesh.rotation.x < 0 ? -1 : 1;
   }
 };
 
