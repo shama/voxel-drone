@@ -65,8 +65,15 @@ module.exports = function(options) { return new Drone(options); };
 module.exports.Drone = Drone;
 
 // return the drone item to add to game
-Drone.prototype.item = function() {
+Drone.prototype.item = function(item) {
   var self = this;
+
+  if (item) {
+    item.tick = self.createTick(item);
+    self._drone = item;
+    return self._drone;
+  }
+
   var group = new self.game.THREE.Object3D();
 
   var drone = new self.game.THREE.Mesh(
