@@ -69,7 +69,11 @@ game.addItem(item);
 drone.viewCamera();
 
 // log navdata
-//drone.on('navdata', console.log.bind(console));
+var battery = document.querySelector('#battery');
+drone.on('navdata', function(data) {
+  battery.innerHTML = data.demo.batteryPercentage + '%';
+  //console.log(data);
+});
 
 // fly the drone
 /*setTimeout(function() {

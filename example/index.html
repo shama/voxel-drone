@@ -33,12 +33,21 @@
         background-color: #d00;
         opacity: 0.5;
       }
+      #battery {
+        position: fixed;
+        top: 5px;
+        left: 5px;
+        font-size: 14px;
+        font-family: impact, arial, sans-serif;
+        color: #333;
+      }
     </style>
   </head>
   <body>
     <div><input type="text" id="cmd" placeholder="Press enter to activate command box. Type in takeoff(), up(0.3), or animate('flipLeft', 15)" /></div>
     <div id="container"></div>
     <div id="crosshair"></div>
+    <div id="battery">0%</div>
     <script type="text/javascript" src="bundle.js"></script>
   </body>
 </html>

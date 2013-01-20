@@ -21,6 +21,8 @@ var Drone = function(options) {
   self.verticalSpeed       = options.verticalSpeed || 0.1;
   self.tilt                = options.tilt || 0.1;
   self.flying              = false;
+  self.batteryCapacity     = 120000; // 20 mins
+  self._batteryLevel       = 120000;
   self._animating          = false;
   self._ledanimating       = false;
   self._navdata            = require('./lib/navdata.json');
@@ -96,8 +98,13 @@ Drone.prototype.createTick = function(drone) {
   return function() {
     dt += 0.01;
 
-    // drain battery - todo: drain batter more on flips and stuff
-    self._navdata.demo.batteryPercentage -= 0.0001;
+    // drain battery - video on, flying, animating
+    self._batteryLevel -= (self._animating && self.flying) ? 4
+      : (self.flying) ? 1.75
+      : 0.5;
+
+    // dead battery X|
+    if (self._batteryLevel <= 0) { self.land(); return; }
 
     // hover - counter gravity
     // todo: make more realistic, add some Math.random()
@@ -204,7 +211,7 @@ Drone.prototype._emitNavdata = function(seq) {
   var self = this;
   with (self._navdata) {
     sequenceNumber = seq;
-    demo.batteryPercentage = Math.floor(demo.batteryPercentage);
+    demo.batteryPercentage = Math.floor((self._batteryLevel / self.batteryCapacity) * 100);
     droneState.flying = self.flying ? 1 : 0;
     // todo: set this closer to actual states
     demo.controlState = self.flying ? 'CTRL_FLYING' : 'CTRL_LANDED';
