@@ -63,6 +63,28 @@ game.addItem(drone.item());
 drone.takeoff();
 ```
 
+### Use Your Own Custom Object
+Would you rather a flying block? The `drone.item(item)` takes an item argument
+to override the object of the drone:
+
+```js
+var createDrone = require('voxel-drone');
+var drone = createDrone(game);
+
+var block = {
+  mesh: new game.THREE.Mesh(
+    new game.THREE.CubeGeometry(25, 25, 25),
+    game.loadTextures(['obsidian'])
+  ),
+  width: 25, height: 25, depth: 25,
+  collisionRadius: 25
+};
+
+game.addItem(drone.item(block));
+```
+
+Voila! A flying api controlled obsidian block.
+
 ## testing
 
 Install devDeps with:
