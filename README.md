@@ -85,13 +85,11 @@ game.addItem(drone.item(block));
 
 Voila! A flying api controlled obsidian block.
 
-## testing
+## run the demo
 
-Install devDeps with:
-`npm install grunt-cli -g && npm install browserify -g && npm install`.
-
-Then run: `grunt` to copy files, browserify things and run a server on
-[http://localhost:8085](http://localhost:8085).
+1. Clone: `git clone git://github.com/shama/voxel-drone && cd voxel-drone`.
+1. Install: `npm install`
+1. Run: `npm start` and goto [http://localhost:8080](http://localhost:8080).
 
 ## release history
 * 0.2.1 - cap the amount of tilt. add front texture. update voxel engine.

@@ -25,7 +25,8 @@
     "node": ">= 0.8.0"
   },
   "scripts": {
-    "test": "grunt"
+    "start": "echo \"open localhost:8080/\" && cd example && ../node_modules/.bin/browservefy world.js 8080 -- -d",
+    "gh-pages": "cp -R ./example/* ./ && browserify world.js -o world.js"
   },
   "dependencies": {
     "ar-drone-browserified": "~0.0.5",
@@ -34,13 +35,12 @@
     "voxel-camera": "~0.1.0"
   },
   "devDependencies": {
-    "voxel-engine": "~0.2.9",
-    "ecstatic": "~0.3.1",
-    "grunt": "~0.4.0rc5",
-    "grunt-contrib-watch": "~0.2.0rc5",
+    "voxel-engine": "~0.3.0",
     "voxel-perlin-terrain": "0.0.5",
     "voxel-forest": "0.0.0",
-    "voxel-debris": "0.0.4"
+    "voxel-debris": "0.0.4",
+    "minecraft-skin": "0.0.1",
+    "browservefy": "0.0.0"
   },
   "keywords": [
     "voxel",

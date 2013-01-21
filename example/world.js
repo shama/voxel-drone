@@ -1,6 +1,7 @@
 var createDrone = require('../');
 var createEngine = require('voxel-engine');
 var createTerrain = require('voxel-perlin-terrain');
+var skin = require('minecraft-skin');
 
 // create the game
 var game = createEngine({
@@ -20,6 +21,16 @@ var container = document.getElementById('container');
 game.appendTo(container);
 container.addEventListener('click', function() {
   game.requestPointerLock(container);
+});
+
+// create shama
+var shama = skin(game.THREE, 'textures/shama.png').createPlayerObject();
+game.scene.add(shama);
+game.on('tick', function() {
+  shama.rotation.y = game.cameraRotation().y + (Math.PI / 180 * 90);
+  shama.position.x = game.controls.yawObject.position.x;
+  shama.position.y = game.controls.yawObject.position.y - 20;
+  shama.position.z = game.controls.yawObject.position.z;
 });
 
 // add some trees
