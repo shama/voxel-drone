@@ -32,10 +32,10 @@
     "ar-drone-browserified": "~0.0.5",
     "voxel-texture": "~0.2.1",
     "voxel-move": "~0.1.0",
-    "voxel-camera": "~0.1.0"
+    "voxel-camera": "~0.1.1"
   },
   "devDependencies": {
-    "voxel-engine": "~0.3.0",
+    "voxel-engine": "~0.3.3",
     "voxel-perlin-terrain": "0.0.5",
     "voxel-forest": "0.0.0",
     "voxel-debris": "0.0.4",

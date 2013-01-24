@@ -150,6 +150,9 @@ Drone.prototype.viewCamera = function() {
   if (!self._cameraControl) {
     self._cameraControl = createCam(self.game);
 
+    // use the camera's png stream :D
+    self._pngStream = self._cameraControl;
+
     // add the camera
     var camera = self._cameraControl.camera();
     self.game.scene.add(camera);
