@@ -1,7 +1,8 @@
-var createDrone = require('../');
-var createEngine = require('voxel-engine');
+var createDrone   = require('../');
+var createEngine  = require('voxel-engine');
 var createTerrain = require('voxel-perlin-terrain');
-var skin = require('minecraft-skin');
+var skin          = require('minecraft-skin');
+var logodrone     = require('logo-drone')();
 
 // create the game
 var game = createEngine({
@@ -56,9 +57,14 @@ window.addEventListener('keyup', function(e) {
   if (e.keyCode !== 13) return;
   var el = document.getElementById('cmd');
   if (document.activeElement === el) {
-    var res;
+    var cmd = el.value, res;
     try {
-      if (el.value !== '') res = eval('drone.' + el.value);
+      if (cmd.indexOf('(') === -1) {
+        // logo ftw!
+        logodrone.convertAndSend(cmd);
+      } else if (el.value !== '') {
+        res = eval('drone.' + el.value);
+      }
     } catch (err) {
       res = err.message;
     }
@@ -71,7 +77,7 @@ window.addEventListener('keyup', function(e) {
 });
 
 // create a drone
-var drone = window.drone = createDrone(game);
+var drone = window.drone = logodrone.drone = createDrone(game);
 var item = drone.item();
 item.mesh.position.set(0, -1200, -300);
 game.addItem(item);

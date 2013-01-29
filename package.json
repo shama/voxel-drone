@@ -25,8 +25,8 @@
     "node": ">= 0.8.0"
   },
   "scripts": {
-    "start": "echo \"open localhost:8080/\" && cd example && ../node_modules/.bin/browservefy world.js 8080 -- -d",
-    "gh-pages": "cp -R ./example/* ./ && browserify world.js -o world.js"
+    "start": "echo \"open localhost:8080/\" && cd example && ../node_modules/.bin/browservefy world.js 8080 -- -d --alias 'ar-drone:ar-drone-browserified'",
+    "gh-pages": "cp -R ./example/* ./ && browserify world.js --alias 'ar-drone:ar-drone-browserified' -o world.js"
   },
   "dependencies": {
     "ar-drone-browserified": "~0.0.5",
