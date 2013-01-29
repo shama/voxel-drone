@@ -1,56 +1,14 @@
 <html>
   <head>
     <title>voxel-drone</title>
-    <style type="text/css">
-      body {
-        font-family: Monospace;
-        font-size: 12px;
-        background-color: #f0f0f0;
-        margin: 0px;
-        overflow: hidden;
-      }
-      #container {
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-      }
-      #cmd {
-        position: fixed;
-        bottom: 10px;
-        left: 50%;
-        margin-left: -250px;
-        width: 500px;
-        padding: 5px;
-        border: none;
-        background-color: #002;
-        color: #0ff;
-        font-family: Helvetica,Arial,sans-serif;
-        font-size: 9px;
-        font-weight: bold;
-      }
-      #crosshair {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        margin: -2px 0 0 -2px;
-        width: 4px;
-        height: 4px;
-        background-color: #d00;
-        opacity: 0.5;
-      }
-      #battery {
-        position: fixed;
-        top: 5px;
-        left: 5px;
-        font-size: 14px;
-        font-family: impact, arial, sans-serif;
-        color: #333;
-      }
-    </style>
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <div><input type="text" id="cmd" placeholder="Press enter to activate command box. Type in takeoff(), up(0.3), or animate('flipLeft', 15)" /></div>
+    <div id="cmdbox">
+      <input type="text" id="cmd" placeholder="" /><br/>
+      Press enter to activate command box. Type in "takeoff()", "up(0.3)", or "animate('flipLeft', 15)".<br/>
+      View more commands on <a href="https://github.com/felixge/node-ar-drone" target="_blank">ar-drone</a> or enter <a href="http://en.wikipedia.org/wiki/Logo_(programming_language)" target="_blank">LOGO</a> commands FTW.
+    </div>
     <div id="container"></div>
     <div id="crosshair"></div>
     <div id="battery">0%</div>
