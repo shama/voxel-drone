@@ -1,8 +1,8 @@
 var util       = require('util');
 var ardrone    = require('ar-drone-browserified');
 var parseAT    = require('./lib/atreader');
-var move       = require('voxel-move');
 var createCam  = require('voxel-camera');
+var tic        = require('tic')();
 
 var Drone = function(options) {
   var self = this;
@@ -10,12 +10,9 @@ var Drone = function(options) {
   if (!options.game) throw new Error('Must specify a game.');
   self.game = options.game;
 
-  self._materialEngine = require('voxel-texture')({
-    texturePath: self.game.texturePath,
-    THREE: self.game.THREE
-  });
+  self.game.on('tick', tic.tick.bind(tic));
 
-  self.size                = options.size || self.game.cubeSize;
+  self.size                = options.size || 1;
   self.altitudeLimit       = options.altitudeLimit || 0;
   self.yawSpeed            = options.yawSpeed || 0.1;
   self.verticalSpeed       = options.verticalSpeed || 0.1;
@@ -78,22 +75,28 @@ Drone.prototype.item = function(item) {
 
   var drone = new self.game.THREE.Mesh(
     new self.game.THREE.CubeGeometry(self.size, self.size/6, self.size),
-    self._materialEngine.loadTexture([
-      'drone-side', 'drone-front',
-      'drone-top', 'drone-bottom',
-      'drone-side', 'drone-side'
-    ])
+    self.game.materials.material
   );
+  drone.position.set(0, self.size/6, 0);
+  drone.rotation.y = deg2Rad(-90);
   group.add(drone);
+
+  self.game.materials.load([[
+    'drone-side', 'drone-front',
+    'drone-top', 'drone-bottom',
+    'drone-side', 'drone-side'
+  ]], function(textures) {
+    self.game.materials.paint(drone, textures[0]);
+  });
 
   self._leds = self._addLEDs(group);
   self.leds('standard');
 
-  self._drone = {
+  self._drone = self.game.addItem({
     mesh: group,
-    width: self.size, height: self.size/6, depth: self.size,
-    collisionRadius: 10
-  };
+    size: self.size,
+    velocity: {x: 0, y: 0, z: 0}
+  });
   self._drone.tick = self.createTick(self._drone);
   return self._drone;
 };
@@ -102,7 +105,8 @@ Drone.prototype.item = function(item) {
 Drone.prototype.createTick = function(drone) {
   var self = this;
   var dt = 0;
-  return function() {
+  var oldTick = drone.tick || function() {};
+  return function(delta) {
     dt += 0.01;
 
     // drain battery - video on, flying, animating
@@ -113,9 +117,7 @@ Drone.prototype.createTick = function(drone) {
     // dead battery X|
     if (self._batteryLevel <= 0) { self.land(); return; }
 
-    // hover - counter gravity
-    // todo: make more realistic, add some Math.random()
-    if (self.flying && !self._animating) drone.velocity = {x: 0, z: 0, y: 0.003};
+    oldTick.call(drone, delta);
 
     var didem = [];
     self._cmds.forEach(function(cmd) {
@@ -178,7 +180,7 @@ Drone.prototype.viewCamera = function() {
     border.position.set(0, 0, 1);
     self._monitor.add(border);
 
-    self._monitor.rotation.x = Math.PI / 180 * 60;
+    self._monitor.rotation.x = deg2Rad(60);
     self.game.scene.add(self._monitor);
   }
   return self._monitor;
@@ -210,7 +212,6 @@ Drone.prototype._addLEDs = function(group) {
     );
     led.translateX((this.size / 3) * (Math.sin(deg2Rad(i * 90) + deg2Rad(45))));
     led.translateZ((this.size / 3) * (Math.cos(deg2Rad(i * 90) + deg2Rad(45))));
-    led.translateY(-2);
     leds.push(led);
     if (group) group.add(led);
   }
@@ -226,12 +227,12 @@ Drone.prototype._emitNavdata = function(seq) {
     // todo: set this closer to actual states
     demo.controlState = self.flying ? 'CTRL_FLYING' : 'CTRL_LANDED';
     if (self._drone !== false) {
-      demo.rotation.frontBack = demo.rotation.pitch = demo.rotation.theta = demo.rotation.y = demo.frontBackDegrees = self._drone.mesh.rotation.x;
-      demo.rotation.leftRight = demo.rotation.roll  = demo.rotation.phi   = demo.rotation.x = demo.leftRightDegrees = self._drone.mesh.rotation.z;
-      demo.rotation.clockwise = demo.rotation.yaw   = demo.rotation.psi   = demo.rotation.z = demo.clockwiseDegrees = self._drone.mesh.rotation.y;
+      /*demo.rotation.frontBack = demo.rotation.pitch = demo.rotation.theta = demo.rotation.y = demo.frontBackDegrees = self._drone.avatar.mesh.rotation.x;
+      demo.rotation.leftRight = demo.rotation.roll  = demo.rotation.phi   = demo.rotation.x = demo.leftRightDegrees = self._drone.avatar.mesh.rotation.z;
+      demo.rotation.clockwise = demo.rotation.yaw   = demo.rotation.psi   = demo.rotation.z = demo.clockwiseDegrees = self._drone.avatar.mesh.rotation.y;
       demo.velocity.x = demo.xVelocity = self._drone.velocity.z;
       demo.velocity.y = demo.yVelocity = self._drone.velocity.x;
-      demo.velocity.z = demo.zVelocity = self._drone.velocity.y;
+      demo.velocity.z = demo.zVelocity = self._drone.velocity.y;*/
       // todo: calculate altitude
     }
   }
@@ -241,26 +242,30 @@ Drone.prototype._emitNavdata = function(seq) {
 Drone.prototype._handleREF = function(dt, drone, cmd) {
   var self = this;
   if (cmd.args[0] === 512) {
-    drone.resting = false;
+    setxyz(drone.resting, false);
     if (!self.flying) {
       // takeoff!
-      drone.velocity.y += 0.015;
-      setTimeout(function() { self.flying = true; }, 500);
+      drone.removeForce(self.game.gravity);
+      drone.velocity.y += 0.002;
+      self.flying = true;
+      tic.timeout(function() { drone.velocity.y = 0; }, 500);
     }
   } else {
     if (self.flying) {
       // land!
-      drone.velocity.y -= 0.015;
-      drone.mesh.rotation.x = 0;
-      drone.mesh.rotation.z = 0;
-      // todo: have this detect altitude and land better
-      setTimeout(function() { self.flying = false; }, 500);
+      self.stop();
+      setxyz(drone.velocity, 0);
+      setxyz(drone.avatar.children[0].rotation, 0);
+      drone.subjectTo(self.game.gravity);
+      self.flying = false;
+      // TODO: land more realistically
     }
   }
 };
 
 Drone.prototype._handlePCMD = function(dt, drone, cmd) {
   if (!this.flying) return;
+  setxyz(drone.velocity, 0);
 
   // args: flags, leftRight, frontBack, upDown, clockWise
   // dont know why leftRight/frontBack are totally switched but they are!
@@ -269,31 +274,37 @@ Drone.prototype._handlePCMD = function(dt, drone, cmd) {
   var upDown    = cmd.args[3] || 0;
   var clockwise = cmd.args[4] || 0;
 
+  // reduce speed
+  var tilt = this.tilt / 100;
+  var verticalSpeed = this.verticalSpeed / 100;
+
+  var rot = drone.avatar.children[0];
+
   // todo: figure auto leveling out
   // when it hits 0, it doesnt level for some reason
-  drone.mesh.rotation.z = anim(dt, drone.mesh.rotation.z, -frontBack/2);
-  if (frontBack !== 0) move(drone).front(frontBack * this.tilt);
-  else if (!this._animating) drone.mesh.rotation.z = 0;
+  rot.rotation.x = anim(dt, rot.rotation.x, frontBack/2);
+  if (frontBack !== 0) drone.velocity.z = frontBack * tilt;
+  else if (!this._animating) rot.rotation.x = 0;
 
-  drone.mesh.rotation.x = anim(dt, drone.mesh.rotation.x, leftRight/2);
-  if (leftRight !== 0) move(drone).left(-leftRight * this.tilt);
-  else if (!this._animating) drone.mesh.rotation.x = 0;
+  rot.rotation.z = anim(dt, rot.rotation.z, leftRight/2);
+  if (leftRight !== 0) drone.velocity.x = -leftRight * tilt;
+  else if (!this._animating) rot.rotation.z = 0;
 
-  if (upDown !== 0) drone.velocity.y += upDown * this.verticalSpeed;
-  if (clockwise !== 0) drone.mesh.rotation.y += clockwise * this.yawSpeed;
+  if (upDown !== 0) drone.velocity.y += upDown * verticalSpeed;
+  if (clockwise !== 0) drone.rotation.y += clockwise * this.yawSpeed;
 
   // tmp fallback level out
   if (frontBack === 0 && leftRight === 0 && !this._animating) {
-    drone.mesh.rotation.x = 0;
-    drone.mesh.rotation.z = 0;
+    rot.rotation.x = 0;
+    rot.rotation.z = 0;
   }
 
   // cap the amount of tilt
-  if (Math.abs(drone.mesh.rotation.z) >= 1 && !this._animating) {
-    drone.mesh.rotation.z = drone.mesh.rotation.z < 0 ? -1 : 1;
+  if (Math.abs(rot.rotation.z) >= 1 && !this._animating) {
+    rot.rotation.z = rot.rotation.z < 0 ? -1 : 1;
   }
-  if (Math.abs(drone.mesh.rotation.x) >= 1 && !this._animating) {
-    drone.mesh.rotation.x = drone.mesh.rotation.x < 0 ? -1 : 1;
+  if (Math.abs(rot.rotation.x) >= 1 && !this._animating) {
+    rot.rotation.x = rot.rotation.x < 0 ? -1 : 1;
   }
 };
 
@@ -319,22 +330,22 @@ Drone.prototype._handleANIM = function(dt, drone, cmd) {
   var type     = this.ANIMATIONS[parseInt(cmd.args[1])];
 
   self._animating = true;
-  setTimeout(function() { self._animating = false; }, duration);
+  tic.timeout(function() { self._animating = false; }, duration);
 
   switch (type) {
     case 'flipLeft': case 'flipRight':
     case 'flipAhead': case 'flipBehind':
       // todo: for longer durations this gets out of hand. should only happen once.
-      drone.velocity.y += 0.045;
-      setTimeout(function() {
+      drone.velocity.y += 0.0045;
+      tic.timeout(function() {
         var amt = (type === 'flipLeft' || type === 'flipAhead') ? deg2Rad(360) : -deg2Rad(360);
         var dir = (type === 'flipLeft' || type === 'flipRight') ? 'x' : 'z';
-        drone.mesh.rotation[dir] = anim(dt, drone.mesh.rotation[dir], amt, duration);
+        drone.avatar.children[0].rotation[dir] = anim(dt, drone.avatar.children[0].rotation[dir], amt, duration);
       }, duration / 5);
       // todo: better adjust above to mimic actual drone
       // where it flies up dramatically flips and comes down
-      setTimeout(function() {
-        drone.velocity.y -= 0.1;
+      tic.timeout(function() {
+        drone.velocity.y -= 0.002;
       }, duration - (duration / 10));
       break;
     // todo: handle the other animations
@@ -354,7 +365,7 @@ Drone.prototype._handleLED = function(dt, drone, cmd) {
 
   var i = 0;
   self.leds('blank');
-  var interval = setInterval(function() {
+  var clearInterval = tic.interval(function() {
     if (!self._ledanimating) return;
     switch (type) {
       case 'blinkRed':
@@ -379,12 +390,19 @@ Drone.prototype._handleLED = function(dt, drone, cmd) {
   }, 100);
 
   self._ledanimating = true;
-  setTimeout(function() {
-    clearInterval(interval);
+  tic.timeout(function() {
+    clearInterval();
     self.leds('standard');
     self._ledanimating = false;
   }, duration);
 };
+
+function setxyz(item, x, y, z) {
+  if (arguments.length < 3) {
+    y = x; z = x;
+  }
+  item.x = x; item.y = y; item.z = z;
+}
 
 // animate values to produce smoother results
 function anim(t, from, to, d) {

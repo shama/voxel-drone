@@ -25,22 +25,26 @@
     "node": ">= 0.8.0"
   },
   "scripts": {
-    "start": "echo \"open localhost:8080/\" && cd example && ../node_modules/.bin/browservefy world.js 8080 -- -d --alias 'ar-drone:ar-drone-browserified'",
+    "start": "cd example && ../node_modules/.bin/browservefy world.js 8080 -- -d --alias 'ar-drone:ar-drone-browserified'",
     "gh-pages": "cp -R ./example/* ./ && browserify world.js --alias 'ar-drone:ar-drone-browserified' -o world.js"
   },
   "dependencies": {
     "ar-drone-browserified": "~0.0.5",
-    "voxel-texture": "~0.2.1",
-    "voxel-move": "~0.1.0",
-    "voxel-camera": "~0.1.1"
+    "voxel-camera": "~0.1.1",
+    "tic": "~0.2.1"
   },
   "devDependencies": {
-    "voxel-engine": "~0.3.3",
+    "voxel-engine": "~0.17.1",
     "voxel-perlin-terrain": "0.0.5",
     "voxel-forest": "0.0.0",
     "voxel-debris": "0.0.4",
-    "minecraft-skin": "0.0.1",
-    "browservefy": "0.0.0"
+    "browservefy": "0.0.10",
+    "voxel-player": "~0.1.0",
+    "logo-drone": "0.0.2"
+  },
+  "peerDependencies": {
+    "voxel-engine": ">= 0.17.0",
+    "voxel-player": ">= 0.1.0"
   },
   "keywords": [
     "voxel",

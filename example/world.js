@@ -1,12 +1,16 @@
 var createDrone   = require('../');
 var createEngine  = require('voxel-engine');
 var createTerrain = require('voxel-perlin-terrain');
-var skin          = require('minecraft-skin');
 var logodrone     = require('logo-drone')();
+
+var tic = require('tic')();
 
 // create the game
 var game = createEngine({
-  generateVoxelChunk: createTerrain({scaleFactor:10}),
+  //generateVoxelChunk: createTerrain({scaleFactor:10}),
+  generate: function(x, y, z) {
+    return (Math.sqrt(x*x + y*y + z*z) > 100 || y*y > 10) ? 0 : (Math.random() * 3) + 1;
+  },
   chunkDistance: 2,
   materials: [
     'obsidian',
@@ -15,30 +19,22 @@ var game = createEngine({
     'plank'
   ],
   texturePath: './textures/',
-  startingPosition: [35, -1200, 35],
-  worldOrigin: [0,0,0],
+  worldOrigin: [0, 0, 0]
 });
 var container = document.getElementById('container');
 game.appendTo(container);
-container.addEventListener('click', function() {
-  game.requestPointerLock(container);
-});
 
 // create shama
-var shama = skin(game.THREE, 'textures/shama.png').createPlayerObject();
-game.scene.add(shama);
-game.on('tick', function() {
-  shama.rotation.y = game.cameraRotation().y + (Math.PI / 180 * 90);
-  shama.position.x = game.controls.yawObject.position.x;
-  shama.position.y = game.controls.yawObject.position.y - 20;
-  shama.position.z = game.controls.yawObject.position.z;
-});
+var createPlayer = require('voxel-player')(game);
+var shama = createPlayer('textures/shama.png');
+shama.yaw.position.set(0, 10, 0);
+shama.possess();
 
 // add some trees
-var createTree = require('voxel-forest');
+/*var createTree = require('voxel-forest');
 for (var i = 0; i < 20; i++) {
   createTree(game, { bark: 4, leaves: 3 });
-}
+}*/
 
 // ability to explode voxels
 var explode = require('voxel-debris')(game);
@@ -76,34 +72,41 @@ window.addEventListener('keyup', function(e) {
   }
 });
 
+
 // create a drone
 var drone = window.drone = logodrone.drone = createDrone(game);
 var item = drone.item();
-item.mesh.position.set(0, -1200, -300);
-game.addItem(item);
 
+// start the drone in front of the player
+item.avatar.position.set(0, 10, -10);
+
+game.on('tick', tic.tick.bind(tic));
+tic.interval(function() {
+  //console.log(item.avatar.position);
+  console.log(item.velocity);
+}, 1000);
 // show the video monitor
-drone.viewCamera();
+//drone.viewCamera();
 
 // log navdata
-var battery = document.querySelector('#battery');
+/*var battery = document.querySelector('#battery');
 drone.on('navdata', function(data) {
   battery.innerHTML = data.demo.batteryPercentage + '%';
   //console.log(data);
-});
+});*/
 
 // fly the drone
-/*setTimeout(function() {
+tic.timeout(function() {
   drone.takeoff();
-  setTimeout(function() {
+  /*setTimeout(function() {
     drone.animateLeds('blinkGreenRed', 30, 10);
-  }, 2000);
-  return;
+  }, 2000);*/
   var cmds = [
-    'front', 'clockwise', 'front',
-    'back', 'clockwise', 'back',
-    'left', 'clockwise', 'left',
-    'right', 'clockwise', 'right',
+    'up', 'front', 'clockwise', 'front',
+    //'front', 'clockwise', 'front',
+    //'back', 'clockwise', 'back',
+    //'left', 'clockwise', 'left',
+    //'right', 'clockwise', 'right',
   ];
   var i = 0;
   (function loop() {
@@ -116,6 +119,6 @@ drone.on('navdata', function(data) {
     drone.stop();
     console.log(cmd);
     drone[cmd](0.5);
-    setTimeout(loop, cmd === 'clockwise' ? 2000 : 5000);
+    tic.timeout(loop, cmd === 'clockwise' ? 2000 : 3000);
   }());
-}, 5000);*/
+}, 2000);
