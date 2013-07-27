@@ -31,7 +31,8 @@
   "dependencies": {
     "ar-drone-browserified": "~0.0.5",
     "voxel-camera": "~0.1.1",
-    "tic": "~0.2.1"
+    "tic": "~0.2.1",
+    "ar-drone": "~0.1.0"
   },
   "devDependencies": {
     "voxel-engine": "~0.17.1",
