@@ -282,11 +282,11 @@ Drone.prototype._handlePCMD = function(dt, drone, cmd) {
 
   // todo: figure auto leveling out
   // when it hits 0, it doesnt level for some reason
-  rot.rotation.x = anim(dt, rot.rotation.x, frontBack/2);
+  rot.rotation.x = anim(dt, rot.rotation.x, -frontBack/2);
   if (frontBack !== 0) drone.velocity.z = frontBack * tilt;
   else if (!this._animating) rot.rotation.x = 0;
 
-  rot.rotation.z = anim(dt, rot.rotation.z, leftRight/2);
+  rot.rotation.z = anim(dt, rot.rotation.z, -leftRight/2);
   if (leftRight !== 0) drone.velocity.x = -leftRight * tilt;
   else if (!this._animating) rot.rotation.z = 0;
 
