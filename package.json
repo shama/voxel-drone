@@ -25,8 +25,7 @@
     "node": ">= 0.8.0"
   },
   "scripts": {
-    "start": "cd example && ../node_modules/.bin/browservefy world.js 8080 -- -d --alias 'ar-drone:ar-drone-browserified'",
-    "gh-pages": "cp -R ./example/* ./ && browserify world.js --alias 'ar-drone:ar-drone-browserified' -o world.js"
+    "start": "cd example && ../node_modules/.bin/beefy world.js 8080 -- -d -r ar-drone-browserified:ar-drone"
   },
   "dependencies": {
     "ar-drone-browserified": "~0.0.5",
@@ -38,9 +37,9 @@
     "voxel-perlin-terrain": "0.0.5",
     "voxel-forest": "0.0.0",
     "voxel-debris": "0.0.4",
-    "browservefy": "0.0.10",
     "voxel-player": "~0.1.0",
-    "logo-drone": "0.0.2"
+    "logo-drone": "0.0.2",
+    "beefy": "~0.4.1"
   },
   "peerDependencies": {
     "voxel-engine": ">= 0.17.0",
