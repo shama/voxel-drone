@@ -92,6 +92,7 @@ Drone.prototype.item = function(item) {
   self._drone = {
     mesh: group,
     width: self.size, height: self.size/6, depth: self.size,
+    velocity: {x:0, y:0, z:0},
     collisionRadius: 10
   };
   self._drone.tick = self.createTick(self._drone);
