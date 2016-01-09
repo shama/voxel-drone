@@ -132,14 +132,14 @@ Drone.prototype.createTick = function(drone) {
     if (self._cameraControl) {
       self._cameraControl.render(
         self._drone,
-        new self.game.THREE.Vector3(-20, 0, 0),
+        new self.game.THREE.Vector3(-2, 0, 0),
         new self.game.THREE.Vector3(-100, 0, 0)
       );
 
       // monitor follows the player
       self._monitor.position = self.game.controls.yawObject.position.clone();
-      self._monitor.position.z += 35;
-      self._monitor.position.y -= 25;
+      self._monitor.position.z += 2;
+      self._monitor.position.y += 0.75;
     }
   };
 };
@@ -161,8 +161,8 @@ Drone.prototype.viewCamera = function() {
 
     self._monitor = new self.game.THREE.Object3D();
 
-    var height = 20;
-    var padding = 2;
+    var height = 1;
+    var padding = 0.01;
 
     var video = new self.game.THREE.Mesh(
       new self.game.THREE.CubeGeometry(1.77 * height, height, 0),
@@ -174,10 +174,10 @@ Drone.prototype.viewCamera = function() {
 
     // border
     var border = new self.game.THREE.Mesh(
-      new self.game.THREE.CubeGeometry((1.77 * height) + padding, height + padding, 1),
+      new self.game.THREE.CubeGeometry((1.77 * height) + padding, height + padding, padding),
       new self.game.THREE.MeshBasicMaterial({color: 0x000000})
     );
-    border.position.set(0, 0, 1);
+    border.position.set(0, 0, padding);
     self._monitor.add(border);
 
     self._monitor.rotation.x = deg2Rad(60);
